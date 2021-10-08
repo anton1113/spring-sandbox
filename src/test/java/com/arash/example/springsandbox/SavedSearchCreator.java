@@ -13,19 +13,24 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class SavedSearchCreator {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Random RANDOM = new Random();
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     private static final String GRAPHQL_URL = "https://api-customer.1.qa.retail.auto1.cloud/v1/retail-customer-gateway/graphql";
     private static final String USERNAME = "saved-search-dev@ukr.net";
     private static final String PASSWORD = "saved-search-password";
 
-    private static final int GENERATE_SAVED_SEARCHES_COUNT = 501;
+    private static final int GENERATE_SAVED_SEARCHES_COUNT = 300;
     private static final int MAX_PRICE = 75_000;
+    private static final long THREAD_POOL_TIMEOUT = 240_000;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -33,10 +38,10 @@ public class SavedSearchCreator {
     void generateSavedSearches() {
         long startedAt = System.currentTimeMillis();
         String authToken = auth();
-        for (int i = 0; i < GENERATE_SAVED_SEARCHES_COUNT; i++) {
-            THREAD_POOL.submit(() -> createSavedSearch(authToken, ))
-            createSavedSearch(authToken, i, 5000 + i);
-        }
+        List<Runnable> runnables = IntStream.range(0, GENERATE_SAVED_SEARCHES_COUNT)
+                .mapToObj(i -> (Runnable) () -> createSavedSearch(authToken, RANDOM.nextInt(MAX_PRICE)))
+                .collect(Collectors.toList());
+        runAllAsync(runnables);
         long finishedAt = System.currentTimeMillis();
         log.info("Time elapsed: {} millis", (finishedAt - startedAt));
     }
@@ -45,7 +50,8 @@ public class SavedSearchCreator {
     void deleteAll() {
         long startedAt = System.currentTimeMillis();
         String authToken = auth();
-        deleteAll(authToken);
+        List<String> savedSearchIds = findAll(authToken);
+        savedSearchIds.forEach(id -> deleteSavedSearch(authToken, id));
         long finishedAt = System.currentTimeMillis();
         log.info("Time elapsed: {} millis", (finishedAt - startedAt));
     }
@@ -98,9 +104,11 @@ public class SavedSearchCreator {
         sendGraphqlQuery(createSavedSearchQuery, authToken, String.class);
     }
 
-    private void deleteAll(String authToken) {
-        List<String> savedSearchIds = findAll(authToken);
-        savedSearchIds.forEach(id -> deleteSavedSearch(authToken, id));
+    @SneakyThrows
+    private void runAllAsync(Collection<Runnable> runnables) {
+        runnables.forEach(THREAD_POOL::execute);
+        THREAD_POOL.shutdown();
+        THREAD_POOL.awaitTermination(THREAD_POOL_TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
     private <T> ResponseEntity<T> sendGraphqlQuery(String query, Class<T> responseType) {
@@ -130,11 +138,6 @@ public class SavedSearchCreator {
     @SneakyThrows
     private String extractAccessToken(String response) {
         return MAPPER.readTree(response).get("data").get("signIn").get("accessToken").asText();
-    }
-
-    @SneakyThrows
-    private String extractSavedSearchId(String response) {
-        return MAPPER.readTree(response).get("data").get("createSavedSearch").get("id").asText();
     }
 
     @SneakyThrows
