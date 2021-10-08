@@ -1,0 +1,17 @@
+{
+    findSavedSearch(search:
+    {
+        sorts:[],
+        page:%d,
+        pageSize:%d
+    }) {
+        page
+        pageSize
+        totalPageCount
+        totalEntityCount
+        entities
+        {
+            id
+        }
+    }
+}

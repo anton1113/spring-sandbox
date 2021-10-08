@@ -1,0 +1,47 @@
+{
+  "_class": "wkda.api.retailsavedsearch.domain.EsAdSavedSearch",
+  "id": "b5c214bd-2937-424a-a7ea-8228b40e2215",
+  "auxUserId": "229c1967-8bc0-4936-a489-1da9e193dace",
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "countryCode": "DE"
+          }
+        },
+        {
+          "nested": {
+            "path": "offerPrice",
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "range": {
+                      "offerPrice.amountMinorUnits": {
+                        "gte": 1000000
+                      }
+                    }
+                  },
+                  {
+                    "range": {
+                      "offerPrice.amountMinorUnits": {
+                        "lte": 7500000
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "searchUri": "/de/search?priceMin=10000&priceMax=75000&scrollTo=3",
+  "retailCountry": "DE",
+  "subscriptionPublishedAt": "2021-10-05T13:50:38.933+02:00",
+  "isEnabled": true,
+  "frequencyPolicy": "daily",
+  "searchType": "saved_search"
+}

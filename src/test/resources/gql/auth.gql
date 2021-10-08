@@ -1,0 +1,11 @@
+mutation {
+    signIn (
+        client_id: "aux",
+        grant_type: "password",
+        password: "%s",
+        username: "%s"
+    ) {
+        accessToken,
+        tokenType
+    }
+}
