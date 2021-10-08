@@ -28,9 +28,10 @@ public class SavedSearchCreator {
     private static final String USERNAME = "saved-search-dev@ukr.net";
     private static final String PASSWORD = "saved-search-password";
 
-    private static final int GENERATE_SAVED_SEARCHES_COUNT = 300;
+    private static final int GENERATE_SAVED_SEARCHES_COUNT = 3000;
     private static final int MAX_PRICE = 75_000;
     private static final long THREAD_POOL_TIMEOUT = 240_000;
+    private static final int PAGE_SIZE = 64;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -51,7 +52,10 @@ public class SavedSearchCreator {
         long startedAt = System.currentTimeMillis();
         String authToken = auth();
         List<String> savedSearchIds = findAll(authToken);
-        savedSearchIds.forEach(id -> deleteSavedSearch(authToken, id));
+        List<Runnable> runnables = savedSearchIds.stream()
+                .map(id -> (Runnable) () -> deleteSavedSearch(authToken, id))
+                .collect(Collectors.toList());
+        runAllAsync(runnables);
         long finishedAt = System.currentTimeMillis();
         log.info("Time elapsed: {} millis", (finishedAt - startedAt));
     }
@@ -81,11 +85,11 @@ public class SavedSearchCreator {
     private List<String> findAll(String authToken) {
         List<String> ids = new ArrayList<>();
         int pageNumber = 0;
-        List<String> pageIds = findSavedSearchPage(authToken, pageNumber, 25);
+        List<String> pageIds = findSavedSearchPage(authToken, pageNumber, PAGE_SIZE);
         while (!pageIds.isEmpty()) {
             ids.addAll(pageIds);
             pageNumber++;
-            pageIds = findSavedSearchPage(authToken, pageNumber, 25);
+            pageIds = findSavedSearchPage(authToken, pageNumber, PAGE_SIZE);
         }
         return ids;
     }
