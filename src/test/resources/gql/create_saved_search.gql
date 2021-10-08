@@ -6,7 +6,7 @@ mutation
             retailCountry: "%s",
             searchUri: "/de/search/?brand=BMW&priceMin=%d&priceMax=75000",
             query: "{\n  \"op\" : \"AND\",\n  \"value\" : [ {\n    \"field\" : \"countryCode\",\n    \"op\" : \"EQ\",\n    \"value\" : \"DE\"\n  }, {\n    \"field\" : \"make\",\n    \"op\" : \"EQ\",\n    \"value\" : \"130\"\n  }, {\n    \"field\" : \"offerPrice.amountMinorUnits\",\n    \"op\" : \"GTE\",\n    \"value\" : %d\n  }, {\n    \"field\" : \"offerPrice.amountMinorUnits\",\n    \"op\" : \"LTE\",\n    \"value\" : 7500000\n  } ]\n}",
-            isEnabled: true,
+            isEnabled: false,
             frequency: "daily",
             type: "saved_search"
         },

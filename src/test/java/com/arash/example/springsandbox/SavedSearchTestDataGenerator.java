@@ -18,20 +18,20 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
-public class SavedSearchCreator {
+public class SavedSearchTestDataGenerator {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final Random RANDOM = new Random();
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     private static final String GRAPHQL_URL = "https://api-customer.1.qa.retail.auto1.cloud/v1/retail-customer-gateway/graphql";
-    private static final String USERNAME = "saved-search-dev@ukr.net";
+    private static final String USERNAME = "anton.rasshchektaiev+saved-search0@auto1.com";
     private static final String PASSWORD = "saved-search-password";
 
-    private static final int GENERATE_SAVED_SEARCHES_COUNT = 3000;
+    private static final int GENERATE_SAVED_SEARCHES_COUNT = 2048;
     private static final int MAX_PRICE = 75_000;
     private static final long THREAD_POOL_TIMEOUT = 240_000;
-    private static final int PAGE_SIZE = 64;
+    private static final int PAGE_SIZE = 32;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
