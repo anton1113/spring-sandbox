@@ -1,4 +1,3 @@
-# docker-compose for cashalot back-end dev purposes
 # should be developer-machine agnostic, except dev-mongo volume
 
 version: "3"
